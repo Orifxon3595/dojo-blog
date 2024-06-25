@@ -1,25 +1,39 @@
 <template>
   <div class="home">
     Home
-    <p>{{name}} sdsdisd sdsds {{age}}</p>
-    <button @click="handleClick">Clicked</button>
+    <Posts v-if="showPosts" :posts="posts"/>
+    <button @click="showPosts = !showPosts">toggle post</button>
+    <button @click="posts.pop()">delete a post</button>
   </div>
 </template>
 
 <script>
+import Posts from "../componts/PostList.vue"
+import {ref} from 'vue'
 
 export default {
   name: 'HomeView',
+  components: {Posts},
   setup(){
-    
+    const posts = ref([])
+    const error = ref(null)
 
-    let name = 'mario'
-    let age = 28
-
-    const handleClick = () => {
-      console.log('Clicked');
+    const load = async () => {
+      try{
+        let data = await fetch('http://localhost:3000/posts')
+        if(!data.ok){
+          throw Error('no data available')
+        }
+        props.value = await data.json()
+      }
+      catch(err){
+        error.value = err.message
+        console.log(error.value);
+      }
     }
-    return {name, age, handleClick}
+
+    const showPosts = ref(true)
+    return{posts, showPosts}
   }
 }
 </script>

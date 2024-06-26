@@ -1,39 +1,27 @@
 <template>
   <div class="home">
     Home
-    <Posts v-if="showPosts" :posts="posts"/>
-    <button @click="showPosts = !showPosts">toggle post</button>
-    <button @click="posts.pop()">delete a post</button>
+    <div v-if="error">{{ error }}</div>
+    <div v-if="posts.length">
+      <PostsList :posts="posts" />
+    </div>
+    <div v-else>Loading...</div>
   </div>
 </template>
 
 <script>
-import Posts from "../componts/PostList.vue"
-import {ref} from 'vue'
+import PostsList from "../components/PostList.vue";
+import getPosts from "../composables/getPsots";
 
 export default {
-  name: 'HomeView',
-  components: {Posts},
-  setup(){
-    const posts = ref([])
-    const error = ref(null)
+  name: "HomeView",
+  components: { PostsList },
+  setup() {
+    const { posts, error, load } = getPosts();
 
-    const load = async () => {
-      try{
-        let data = await fetch('http://localhost:3000/posts')
-        if(!data.ok){
-          throw Error('no data available')
-        }
-        props.value = await data.json()
-      }
-      catch(err){
-        error.value = err.message
-        console.log(error.value);
-      }
-    }
+    load();
 
-    const showPosts = ref(true)
-    return{posts, showPosts}
-  }
-}
+    return {posts, error}
+  },
+};
 </script>
